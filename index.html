@@ -269,7 +269,11 @@
         Your browser does not support the audio element.
     </audio>
 
-    <!-- Ticking sound will be generated using Web Audio API -->
+    <!-- Audio element for decision ticking sound -->
+    <audio id="tickingSound" loop preload="auto">
+        <source src="clock-tick.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
     <!-- Decorative floating bunnies around the card -->
     <div class="bunny-decoration" style="top: 10%; left: 5%;">🐰</div>
@@ -317,51 +321,40 @@
         let noBtnMoves = 0;
         let lastMoveTime = 0;
         const moveThrottle = 300; // Minimum milliseconds between moves
-        let audioContext;
-        let tickInterval;
+        let tickSound;
+        let tickingStarted = false;
 
-        // Create a subtle ticking sound using Web Audio API
-        function playTickSound() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            // Create a subtle tick sound
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
-
-            // Very short, quiet tick
-            gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
-
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.05);
-        }
-
-        // Start ticking sound when page loads (on user interaction)
+        // Start ticking sound on ANY user interaction
         function startTicking() {
-            if (!tickInterval) {
-                playTickSound();
-                tickInterval = setInterval(playTickSound, 1000); // Tick every second
+            if (!tickingStarted) {
+                if (!tickSound) {
+                    tickSound = document.getElementById('tickingSound');
+                }
+
+                if (tickSound) {
+                    tickSound.volume = 0.4;
+                    tickSound.play()
+                        .then(() => {
+                            console.log('✓ Ticking sound playing');
+                            tickingStarted = true;
+                            // Remove event listeners once started
+                            document.removeEventListener('click', startTicking);
+                            document.removeEventListener('mousemove', startTicking);
+                            document.removeEventListener('touchstart', startTicking);
+                            document.removeEventListener('keydown', startTicking);
+                        })
+                        .catch(error => {
+                            console.log('✗ Ticking blocked:', error.message);
+                        });
+                }
             }
         }
 
-        function stopTicking() {
-            if (tickInterval) {
-                clearInterval(tickInterval);
-                tickInterval = null;
-            }
-        }
-
-        // Start ticking on first interaction
-        document.addEventListener('click', startTicking, { once: true });
-        document.addEventListener('mousemove', startTicking, { once: true });
+        // Add listeners for every possible user interaction
+        document.addEventListener('click', startTicking);
+        document.addEventListener('mousemove', startTicking);
+        document.addEventListener('touchstart', startTicking);
+        document.addEventListener('keydown', startTicking);
 
         function moveButton() {
             // Throttle the move function to prevent too many rapid calls
@@ -506,7 +499,10 @@
             celebrationCard.style.display = 'block';
 
             // Stop ticking sound and play celebration song
-            stopTicking();
+            if (tickSound) {
+                tickSound.pause();
+                tickSound.currentTime = 0;
+            }
 
             const song = document.getElementById('celebrationSong');
             song.play().catch(error => {
