@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will you be my Valentine?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ffc3e1 0%, #ffb3d9 50%, #ff9ec7 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+            scroll-behavior: smooth;
+        }
+
+        /* Hide scrollbar but keep functionality */
+        .container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: rgba(255, 105, 180, 0.3);
+            border-radius: 3px;
+        }
+
+        .container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 105, 180, 0.5);
+        }
+
+        .bunny {
+            font-size: 100px;
+            margin-bottom: 15px;
+            animation: float 3s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 18px 50px;
+            font-size: 24px;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #yesBtn {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff1744 100%);
+            color: white;
+        }
+
+        #yesBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 23, 68, 0.4);
+        }
+
+        #noBtn {
+            background: #e0e0e0;
+            color: #666;
+            position: relative;
+        }
+
+        .note {
+            font-size: 14px;
+            color: #999;
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        .celebration {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .celebration h2 {
+            font-size: 32px;
+            color: #ff1744;
+            margin: 15px 0;
+        }
+
+        .celebration-message {
+            font-size: 18px;
+            color: #333;
+            line-height: 1.5;
+            margin: 12px 0;
+        }
+
+        .gif-container {
+            margin: 20px 0 10px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .gif-container img {
+            width: 100%;
+            max-width: 350px;
+            display: block;
+        }
+
+        /* Confetti and Hearts */
+        .confetti, .heart {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti {
+            width: 10px;
+            height: 10px;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        .heart {
+            font-size: 24px;
+            animation: heart-fall 4s linear forwards;
+            opacity: 0.9;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes heart-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Decorative floating bunnies around the card */
+        .bunny-decoration {
+            position: fixed;
+            font-size: 40px;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.7;
+            animation: bunnyFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes bunnyFloat {
+            0%, 100% {
+                transform: translateY(0px) rotate(-5deg);
+            }
+            50% {
+                transform: translateY(-30px) rotate(5deg);
+            }
+        }
+
+        .bunny-decoration:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .bunny-decoration:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        .bunny-decoration:nth-child(4) {
+            animation-delay: 1.5s;
+        }
+
+        .bunny-decoration:nth-child(5) {
+            animation-delay: 2s;
+        }
+
+        .bunny-decoration:nth-child(6) {
+            animation-delay: 2.5s;
+        }
+
+        @keyframes hop {
+            0%, 100% {
+                transform: translateY(0px) scale(1);
+            }
+            50% {
+                transform: translateY(-20px) scale(1.1);
+            }
+        }
+
+        .bunny-hop {
+            animation: hop 1.5s ease-in-out infinite;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 40px 30px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            button {
+                padding: 15px 40px;
+                font-size: 20px;
+            }
+            .bunny-decoration {
+                font-size: 30px;
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Audio element for celebration song -->
+    <audio id="celebrationSong" preload="auto">
+        <source src="beyond-leon-bridges.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Decorative floating bunnies around the card -->
+    <div class="bunny-decoration" style="top: 10%; left: 5%;">🐰</div>
+    <div class="bunny-decoration" style="top: 15%; right: 8%;">🐰</div>
+    <div class="bunny-decoration" style="top: 50%; left: 3%;">🐰💕</div>
+    <div class="bunny-decoration" style="top: 55%; right: 5%;">💕🐰</div>
+    <div class="bunny-decoration" style="bottom: 15%; left: 7%;">🐰✨</div>
+    <div class="bunny-decoration" style="bottom: 10%; right: 6%;">🐰💖</div>
+
+    <div class="container">
+        <div id="questionCard">
+            <div class="bunny">🐰💕🐰</div>
+            <h1>Bujjiluuuuu, will you be my Valentine??!! 🐰💝</h1>
+            <div class="buttons">
+                <button id="yesBtn">Yes</button>
+                <button id="noBtn">No</button>
+            </div>
+            <p class="note">*"No" seems a bit shy 🦋 (but bunnies always say yes 🐰)</p>
+        </div>
+
+        <div id="celebrationCard" class="celebration">
+            <div class="bunny">🐰🎉🐰💕</div>
+            <h2>YAYYYY! 🎊🐰✨</h2>
+            <p class="celebration-message">
+                The best yes before our biggest YES! Our last Valentine's as fiancés....next year as husband & wife! 💍✨💑
+            </p>
+            <p class="celebration-message" style="margin-top: 10px;">
+                🐰❤️🐵 Bunny & Monkey forever! 🐰❤️🐵
+            </p>
+            <p class="celebration-message love-note" style="font-style: italic; color: #ff1744; margin-top: 10px;">
+                I love you soo much! You're my everything and so much more! 💕
+            </p>
+            <div class="gif-container">
+                <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDJ2ZzVpcXFpdmlqbXViMXp5NGZsdDIzejk3NGdiOWd0ZnNqY2FlOCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/75ZaxapnyMp2w/giphy.gif" alt="Mind Blown Celebration">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const questionCard = document.getElementById('questionCard');
+        const celebrationCard = document.getElementById('celebrationCard');
+
+        let noBtnMoves = 0;
+
+        function moveButton() {
+            const container = document.querySelector('.container');
+            const containerRect = container.getBoundingClientRect();
+            const btnRect = noBtn.getBoundingClientRect();
+
+            // Get viewport dimensions
+            const maxX = window.innerWidth - btnRect.width - 40;
+            const maxY = window.innerHeight - btnRect.height - 40;
+
+            // Random position - now moves MUCH further away
+            let newX, newY;
+
+            // Make it progressively MUCH harder to catch - starts at 500px jumps!
+            const moveRange = Math.min(500 + (noBtnMoves * 100), 1500);
+
+            // Ensure it moves far away from current position
+            do {
+                newX = Math.random() * maxX;
+                newY = Math.random() * maxY;
+            } while (
+                Math.abs(newX - btnRect.left) < 200 ||
+                Math.abs(newY - btnRect.top) < 200
+            );
+
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = newX + 'px';
+            noBtn.style.top = newY + 'px';
+            noBtn.style.transition = 'all 0.2s ease-out';
+            noBtn.style.zIndex = '1001';
+
+            noBtnMoves++;
+
+            // Progressive mischief
+            if (noBtnMoves > 3) {
+                noBtn.style.transform = 'scale(0.8)';
+                noBtn.textContent = '🏃‍♂️';
+            }
+            if (noBtnMoves > 6) {
+                noBtn.style.transform = 'scale(0.6)';
+                noBtn.textContent = '💨';
+            }
+            if (noBtnMoves > 10) {
+                noBtn.style.transform = 'scale(0.4)';
+                noBtn.textContent = '😏';
+            }
+        }
+
+        // Make the button super elusive - moves on ANY interaction attempt
+        noBtn.addEventListener('mouseenter', moveButton);
+        noBtn.addEventListener('mouseover', moveButton);
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            moveButton();
+        });
+        noBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            moveButton();
+        });
+        noBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            moveButton();
+        });
+
+        // Extra sneaky: move when mouse gets within 100px of the button
+        document.addEventListener('mousemove', (e) => {
+            const btnRect = noBtn.getBoundingClientRect();
+            const btnCenterX = btnRect.left + btnRect.width / 2;
+            const btnCenterY = btnRect.top + btnRect.height / 2;
+            const distance = Math.sqrt(
+                Math.pow(e.clientX - btnCenterX, 2) +
+                Math.pow(e.clientY - btnCenterY, 2)
+            );
+
+            // If mouse gets too close, button runs away
+            if (distance < 100 && noBtn.style.position === 'fixed') {
+                moveButton();
+            }
+        });
+
+        function createConfetti() {
+            const colors = ['#ff6b9d', '#ff1744', '#ff69b4', '#ffc0cb', '#ff1493'];
+            
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.top = '-10px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 3500);
+                }, i * 30);
+            }
+        }
+
+        function createHearts() {
+            const heartEmojis = ['💕', '💖', '💗', '💓', '💝', '❤️', '💘'];
+
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart';
+                    heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+                    heart.style.left = Math.random() * window.innerWidth + 'px';
+                    heart.style.top = '-50px';
+                    heart.style.animationDelay = Math.random() * 0.5 + 's';
+                    heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                    document.body.appendChild(heart);
+
+                    setTimeout(() => heart.remove(), 4500);
+                }, i * 50);
+            }
+        }
+
+        function createCelebrationBunnies() {
+            const bunnyEmojis = ['🐰', '🐰', '🐰💕', '🐰💖', '🐰✨', '🐰🎉'];
+
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const bunny = document.createElement('div');
+                    bunny.className = 'heart'; // Reuse heart animation class
+                    bunny.textContent = bunnyEmojis[Math.floor(Math.random() * bunnyEmojis.length)];
+                    bunny.style.left = Math.random() * window.innerWidth + 'px';
+                    bunny.style.top = '-50px';
+                    bunny.style.fontSize = (Math.random() * 20 + 24) + 'px';
+                    bunny.style.animationDelay = Math.random() * 0.5 + 's';
+                    bunny.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                    document.body.appendChild(bunny);
+
+                    setTimeout(() => bunny.remove(), 4500);
+                }, i * 60);
+            }
+        }
+
+        yesBtn.addEventListener('click', () => {
+            questionCard.style.display = 'none';
+            celebrationCard.style.display = 'block';
+
+            // Play celebration song
+            const song = document.getElementById('celebrationSong');
+            song.play().catch(error => {
+                console.log('Audio playback failed:', error);
+            });
+
+            createConfetti();
+            createHearts();
+            createCelebrationBunnies();
+
+            // Continue creating confetti, hearts, and bunnies for a few seconds
+            setTimeout(createConfetti, 2000);
+            setTimeout(createHearts, 1500);
+            setTimeout(createCelebrationBunnies, 1000);
+            setTimeout(createCelebrationBunnies, 3000);
+        });
+    </script>
+</body>
+</html>
