@@ -269,6 +269,8 @@
         Your browser does not support the audio element.
     </audio>
 
+    <!-- Ticking sound will be generated using Web Audio API -->
+
     <!-- Decorative floating bunnies around the card -->
     <div class="bunny-decoration" style="top: 10%; left: 5%;">🐰</div>
     <div class="bunny-decoration" style="top: 15%; right: 8%;">🐰</div>
@@ -313,8 +315,61 @@
         const celebrationCard = document.getElementById('celebrationCard');
 
         let noBtnMoves = 0;
+        let lastMoveTime = 0;
+        const moveThrottle = 300; // Minimum milliseconds between moves
+        let audioContext;
+        let tickInterval;
+
+        // Create a subtle ticking sound using Web Audio API
+        function playTickSound() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            // Create a subtle tick sound
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            // Very short, quiet tick
+            gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.05);
+        }
+
+        // Start ticking sound when page loads (on user interaction)
+        function startTicking() {
+            if (!tickInterval) {
+                playTickSound();
+                tickInterval = setInterval(playTickSound, 1000); // Tick every second
+            }
+        }
+
+        function stopTicking() {
+            if (tickInterval) {
+                clearInterval(tickInterval);
+                tickInterval = null;
+            }
+        }
+
+        // Start ticking on first interaction
+        document.addEventListener('click', startTicking, { once: true });
+        document.addEventListener('mousemove', startTicking, { once: true });
 
         function moveButton() {
+            // Throttle the move function to prevent too many rapid calls
+            const now = Date.now();
+            if (now - lastMoveTime < moveThrottle) {
+                return;
+            }
+            lastMoveTime = now;
             const container = document.querySelector('.container');
             const containerRect = container.getBoundingClientRect();
             const btnRect = noBtn.getBoundingClientRect();
@@ -363,7 +418,6 @@
 
         // Make the button super elusive - moves on ANY interaction attempt
         noBtn.addEventListener('mouseenter', moveButton);
-        noBtn.addEventListener('mouseover', moveButton);
         noBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
             moveButton();
@@ -372,12 +426,8 @@
             e.preventDefault();
             moveButton();
         });
-        noBtn.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            moveButton();
-        });
 
-        // Extra sneaky: move when mouse gets within 100px of the button
+        // Extra sneaky: move when mouse gets within 120px of the button (throttled by moveButton)
         document.addEventListener('mousemove', (e) => {
             const btnRect = noBtn.getBoundingClientRect();
             const btnCenterX = btnRect.left + btnRect.width / 2;
@@ -387,8 +437,8 @@
                 Math.pow(e.clientY - btnCenterY, 2)
             );
 
-            // If mouse gets too close, button runs away
-            if (distance < 100 && noBtn.style.position === 'fixed') {
+            // If mouse gets too close, button runs away (throttled internally)
+            if (distance < 120 && noBtn.style.position === 'fixed') {
                 moveButton();
             }
         });
@@ -455,7 +505,9 @@
             questionCard.style.display = 'none';
             celebrationCard.style.display = 'block';
 
-            // Play celebration song
+            // Stop ticking sound and play celebration song
+            stopTicking();
+
             const song = document.getElementById('celebrationSong');
             song.play().catch(error => {
                 console.log('Audio playback failed:', error);
